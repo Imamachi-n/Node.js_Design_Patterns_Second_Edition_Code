@@ -2,8 +2,9 @@
 
 const fs = require('fs');
 const cache = {};
+
 function inconsistentRead(filename, callback) {
-  if(cache[filename]) {
+  if (cache[filename]) {
     // invoked synchronously
     callback(cache[filename]);
   } else {
@@ -18,11 +19,20 @@ function inconsistentRead(filename, callback) {
 function createFileReader(filename) {
   const listeners = [];
   inconsistentRead(filename, value => {
-    listeners.forEach(listener => listener(value));
+    console.log("callbacked...");
+    listeners.forEach(listener => {
+      console.log("listener...");
+      console.log(value);
+      return listener(value)
+    });
   });
 
   return {
-    onDataReady: listener => listeners.push(listener)
+    onDataReady: listener => {
+      console.log("onDataReady...")
+      console.log(listener);
+      return listeners.push(listener)
+    }
   };
 }
 
@@ -33,7 +43,7 @@ reader1.onDataReady(data => {
   // ...sometime later we try to read again from
   // the same file
   const reader2 = createFileReader('data.txt');
-  reader2.onDataReady( data => {
+  reader2.onDataReady(data => {
     console.log('Second call data: ' + data);
   });
 });
